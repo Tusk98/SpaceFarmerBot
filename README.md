@@ -10,10 +10,9 @@
    - [xdg](https://github.com/srstevenson/xdg)
 
 ## Configuration
+See [config.toml](https://github.com/Tusk98/SpaceFarmerBot/blob/master/config/config.toml)
+
 Place config files inside `$XDG_CONFIG_HOME/SpaceFarmerBot` (usually `$HOME/.config/SpaceFarmerBot/` on GNU/Linux).
-```
-token="your bot token here"
-```
 
 ## Running
 ```
