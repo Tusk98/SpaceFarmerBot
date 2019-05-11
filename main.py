@@ -29,6 +29,7 @@ if (__name__ == "__main__"):
             parsed_toml = toml.load(f)
 
         if ("token" in parsed_toml):
+            print("Logging in...")
             client.run(parsed_toml["token"])
         else:
             print("No bot token configured!")
