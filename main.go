@@ -49,6 +49,7 @@ func main() {
 	toml_data, err := ioutil.ReadFile(config_path)
 	if err != nil {
 		fmt.Println("Failed to read config file:", err)
+		return
 	}
 
 	var config Config
