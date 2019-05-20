@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/signal"
 	"syscall"
-	"github.com/BurntSushi/toml"
 	"github.com/adrg/xdg"
 	"github.com/bwmarrin/discordgo"
-//	"github.com/pelletier/go-toml"
+	"github.com/pelletier/go-toml"
 )
 
 type BotConfig struct {
@@ -38,20 +38,25 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "Ping!")
 	}
 }
+const CONFIG_PATH string = "SpaceFarmerBot/config.toml"
 
 func main() {
-	config_path, err := xdg.SearchConfigFile("SpaceFarmerBot/config.toml")
+	config_path, err := xdg.SearchConfigFile(CONFIG_PATH)
 	if err != nil {
 		fmt.Println("Failed to find config file:", err)
 		return
 	}
+	toml_data, err := ioutil.ReadFile(config_path)
+	if err != nil {
+		fmt.Println("Failed to read config file:", err)
+	}
 
-	var conf Config
-	if _, err := toml.DecodeFile(config_path, &conf); err != nil {
+	var config Config
+	if err := toml.Unmarshal(toml_data, &config); err != nil {
 		fmt.Println("Failed to parse config file:", err)
 		return
 	}
-	var Token = conf.Bot.Token
+	var Token = config.Bot.Token
 	fmt.Println("Token", Token)
 	// Create a new Discord session using the provided bot token.
 	dg, err := discordgo.New("Bot " + Token)

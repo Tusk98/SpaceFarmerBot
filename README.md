@@ -1,13 +1,16 @@
 # SpaceFarmerBot
 
+<p>
+<img src="https://github.com/Tusk98/SpaceFarmerBot/raw/master/spacefarmer.jpg"
+     width="350">
+</p>
+
 ## Dependencies
- - python3.6+
- - pip
-   - [discord.py](https://github.com/Rapptz/discord.py)
-   - [youtube-dl](https://github.com/rg3/youtube-dl)
-   - [webpreview](https://github.com/ludbek/webpreview)
-   - [toml](https://github.com/uiri/toml)
-   - [xdg](https://github.com/srstevenson/xdg)
+
+ - golang
+   - [discord-go](https://github.com/bwmarrin/discordgo)
+   - [go-toml](https://github.com/pelletier/go-toml)
+   - [xdg](https://github.com/adrg/xdg)
 
 ## Configuration
 See [config.toml](https://github.com/Tusk98/SpaceFarmerBot/blob/master/config/config.toml)
@@ -16,7 +19,6 @@ Place config files inside `$XDG_CONFIG_HOME/SpaceFarmerBot` (usually `$HOME/.con
 
 ## Running
 ```
-~ $ python3 main.py
 ```
 
 ## Features
