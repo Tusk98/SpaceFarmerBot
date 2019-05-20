@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"strings"
 	"os"
 	"os/signal"
 	"syscall"
@@ -10,6 +11,9 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/pelletier/go-toml"
 )
+
+const CONFIG_PATH string = "SpaceFarmerBot/config.toml"
+const COMMAND_PREFIX string = "!"
 
 type BotConfig struct {
 	Token string
@@ -19,26 +23,26 @@ type Config struct {
 	Bot BotConfig
 }
 
+
+func onReady(discord *discordgo.Session, ready *discordgo.Ready) {
+	err := discord.UpdateStatus(0, "A friendly helpful bot!")
+	if err != nil {
+	    fmt.Println("Error attempting to set bot status:", err)
+	}
+}
+
 // This function will be called (due to AddHandler above) every time a new
 // message is created on any channel that the autenticated bot has access to.
-func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-
-	// Ignore all messages created by the bot itself
-	// This isn't required in this specific example but it's a good practice.
+func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+	// do not do anything if message is from bot
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
-	// If the message is "ping" reply with "Pong!"
-	if m.Content == "ping" {
-		s.ChannelMessageSend(m.ChannelID, "Pong!")
+	if !strings.HasPrefix(m.Content, COMMAND_PREFIX) {
+		return
 	}
-
-	// If the message is "pong" reply with "Ping!"
-	if m.Content == "pong" {
-		s.ChannelMessageSend(m.ChannelID, "Ping!")
-	}
+	s.ChannelMessageSend(m.ChannelID, "Hello");
 }
-const CONFIG_PATH string = "SpaceFarmerBot/config.toml"
 
 func main() {
 	config_path, err := xdg.SearchConfigFile(CONFIG_PATH)
@@ -59,6 +63,7 @@ func main() {
 	}
 	var Token = config.Bot.Token
 	fmt.Println("Token", Token)
+
 	// Create a new Discord session using the provided bot token.
 	dg, err := discordgo.New("Bot " + Token)
 	if err != nil {
@@ -67,7 +72,8 @@ func main() {
 	}
 
 	// Register the messageCreate func as a callback for MessageCreate events.
-	dg.AddHandler(messageCreate)
+	dg.AddHandler(onReady)
+	dg.AddHandler(commandHandler)
 
 	// Open a websocket connection to Discord and begin listening.
 	err = dg.Open()
@@ -80,6 +86,7 @@ func main() {
 	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+
 	<-sc
 
 	// Cleanly close down the Discord session.
