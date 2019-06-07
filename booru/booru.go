@@ -1,10 +1,13 @@
 package booru
 
 import (
+	"fmt"
 	"strings"
+	"github.com/bwmarrin/discordgo"
 )
 
 type BooruPost struct {
+	Source string
 	ID int
 	ImageWidth int
 	ImageHeight int
@@ -16,10 +19,21 @@ func (self *BooruPost) GetPreviewUrl() string {
 	return self.PreviewFileUrl
 }
 
+const COLOR int = 0xff93ac
+
+func (self *BooruPost) ToDiscordEmbed() *discordgo.MessageEmbed {
+	return &discordgo.MessageEmbed {
+		Title: fmt.Sprintf("%s: #%d", self.Source, self.ID),
+		Color: COLOR,
+		Image: &discordgo.MessageEmbedImage {
+			URL: self.PreviewFileUrl,
+		},
+	}
+}
+
 type UnknownBooruError struct {
 	arg string
 }
-
 
 func (self *UnknownBooruError) Error() string {
 	return self.arg

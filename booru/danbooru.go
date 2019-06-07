@@ -17,6 +17,7 @@ type danbooruPost struct {
 
 func (self *danbooruPost) toBooruPost() BooruPost {
 	booru_post := BooruPost {
+		Source: "Danbooru",
 		ID: self.ID,
 		ImageWidth: self.ImageWidth,
 		ImageHeight: self.ImageHeight,

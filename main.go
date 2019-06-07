@@ -15,6 +15,7 @@ import (
 
 const CONFIG_PATH string = "SpaceFarmerBot/config.toml"
 const COMMAND_PREFIX string = "!"
+const COLOR int = 0xff93ac
 
 type BotConfig struct {
 	Token string
@@ -28,7 +29,7 @@ type Config struct {
 func onReady(discord *discordgo.Session, ready *discordgo.Ready) {
 	err := discord.UpdateStatus(0, "A friendly helpful bot!")
 	if err != nil {
-	    fmt.Println("Error attempting to set bot status:", err)
+		fmt.Println("Error attempting to set bot status:", err)
 	}
 }
 
@@ -42,15 +43,16 @@ func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if !strings.HasPrefix(m.Content, COMMAND_PREFIX) {
 		return
 	}
-    if strings.HasPrefix(m.Content, "!daily") {
-        args := strings.TrimSpace(m.Content[len("!daily"):])
-        post, err := booru.BooruGetLatest(args)
-        if err != nil {
-            s.ChannelMessageSend(m.ChannelID, err.Error())
-        } else {
-            s.ChannelMessageSend(m.ChannelID, post.GetPreviewUrl())
-        }
-    }
+	if strings.HasPrefix(m.Content, "!daily") {
+		args := strings.TrimSpace(m.Content[len("!daily"):])
+		post, err := booru.BooruGetLatest(args)
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, err.Error())
+		} else {
+			embed := post.ToDiscordEmbed()
+			s.ChannelMessageSendEmbed(m.ChannelID, embed)
+		}
+	}
 }
 
 func main() {
