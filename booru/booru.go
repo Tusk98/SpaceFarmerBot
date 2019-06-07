@@ -9,10 +9,11 @@ import (
 type BooruPost struct {
 	Source string
 	ID int
-	ImageWidth int
-	ImageHeight int
+	URL string
 	PreviewFileUrl string
 	FileUrl string
+	ImageWidth int
+	ImageHeight int
 }
 
 func (self *BooruPost) GetPreviewUrl() string {
@@ -28,6 +29,7 @@ func (self *BooruPost) ToDiscordEmbed() *discordgo.MessageEmbed {
 		Image: &discordgo.MessageEmbedImage {
 			URL: self.PreviewFileUrl,
 		},
+		URL: self.URL,
 	}
 }
 

@@ -1,6 +1,7 @@
 package booru
 
 import (
+	"fmt"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -19,10 +20,11 @@ func (self *danbooruPost) toBooruPost() BooruPost {
 	booru_post := BooruPost {
 		Source: "Danbooru",
 		ID: self.ID,
-		ImageWidth: self.ImageWidth,
-		ImageHeight: self.ImageHeight,
+		URL: fmt.Sprintf("https://danbooru.donmai.us/posts/%d", self.ID),
 		PreviewFileUrl: self.PreviewFileUrl,
 		FileUrl: self.FileUrl,
+		ImageWidth: self.ImageWidth,
+		ImageHeight: self.ImageHeight,
 	}
 	return booru_post
 }

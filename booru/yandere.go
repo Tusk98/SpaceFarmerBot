@@ -1,6 +1,7 @@
 package booru
 
 import (
+	"fmt"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -19,10 +20,11 @@ func (self *yanderePost) toBooruPost() BooruPost {
 	booru_post := BooruPost {
 		Source: "Yandere",
 		ID: self.ID,
-		ImageWidth: self.ImageWidth,
-		ImageHeight: self.ImageHeight,
+		URL: fmt.Sprintf("https://yande.re/post/show/%d", self.ID),
 		PreviewFileUrl: self.PreviewFileUrl,
 		FileUrl: self.FileUrl,
+		ImageWidth: self.ImageWidth,
+		ImageHeight: self.ImageHeight,
 	}
 	return booru_post
 }
