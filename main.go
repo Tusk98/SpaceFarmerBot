@@ -10,6 +10,7 @@ import (
 	"github.com/adrg/xdg"
 	"github.com/bwmarrin/discordgo"
 	"github.com/pelletier/go-toml"
+	"github.com/Tusk98/SpaceFarmerBot/booru"
 )
 
 const CONFIG_PATH string = "SpaceFarmerBot/config.toml"
@@ -41,7 +42,14 @@ func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if !strings.HasPrefix(m.Content, COMMAND_PREFIX) {
 		return
 	}
-	s.ChannelMessageSend(m.ChannelID, "Hello");
+    if strings.HasPrefix(m.Content, "!daily") {
+        post, err := booru.DanbooruLatestPost()
+        if err != nil {
+            s.ChannelMessageSend(m.ChannelID, post.PreviewFileUrl)
+        } else {
+            s.ChannelMessageSend(m.ChannelID, err.Error())
+        }
+    }
 }
 
 func main() {
