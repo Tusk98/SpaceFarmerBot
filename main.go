@@ -43,11 +43,12 @@ func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
     if strings.HasPrefix(m.Content, "!daily") {
-        post, err := booru.DanbooruLatestPost()
+        args := strings.TrimSpace(m.Content[len("!daily"):])
+        post, err := booru.BooruGetLatest(args)
         if err != nil {
-            s.ChannelMessageSend(m.ChannelID, post.PreviewFileUrl)
-        } else {
             s.ChannelMessageSend(m.ChannelID, err.Error())
+        } else {
+            s.ChannelMessageSend(m.ChannelID, post.GetPreviewUrl())
         }
     }
 }

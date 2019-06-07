@@ -7,15 +7,15 @@ import (
 	"time"
 )
 
-type danbooruPost struct {
+type yanderePost struct {
 	ID int `json:"id"`
-	ImageWidth int `json:"image_width"`
-	ImageHeight int `json:"image_height"`
-	PreviewFileUrl string `json:"large_file_url"`
+	ImageWidth int `json:"width"`
+	ImageHeight int `json:"height"`
+	PreviewFileUrl string `json:"sample_url"`
 	FileUrl string `json:"file_url"`
 }
 
-func (self *danbooruPost) toBooruPost() BooruPost {
+func (self *yanderePost) toBooruPost() BooruPost {
 	booru_post := BooruPost {
 		ID: self.ID,
 		ImageWidth: self.ImageWidth,
@@ -26,8 +26,8 @@ func (self *danbooruPost) toBooruPost() BooruPost {
 	return booru_post
 }
 
-func DanbooruLatestPost() (BooruPost, error) {
-	const api_url = "https://danbooru.donmai.us/posts.json?limit=1"
+func YandereLatestPost() (BooruPost, error) {
+	const api_url = "https://yande.re/post.json?limit=1"
 
 	spaceClient := http.Client{Timeout: time.Second * 2}
 	req, err := http.NewRequest(http.MethodGet, api_url, nil)
@@ -46,7 +46,7 @@ func DanbooruLatestPost() (BooruPost, error) {
 		return BooruPost{}, readErr
 	}
 
-	var posts [1]danbooruPost
+	var posts [1]yanderePost
 	jsonErr := json.Unmarshal(json_content, &posts)
 	if jsonErr != nil {
 		return BooruPost{}, jsonErr
