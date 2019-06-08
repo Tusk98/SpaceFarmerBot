@@ -43,8 +43,9 @@ func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if !strings.HasPrefix(m.Content, COMMAND_PREFIX) {
 		return
 	}
-	if strings.HasPrefix(m.Content, "!daily") {
-		args := strings.TrimSpace(m.Content[len("!daily"):])
+    msg := m.Content[len(COMMAND_PREFIX):]
+	if strings.HasPrefix(msg, "daily") {
+		args := strings.TrimSpace(msg[len("!daily"):])
 		post, err := booru.BooruGetLatest(args)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, err.Error())
