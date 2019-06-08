@@ -13,16 +13,23 @@ type gelbooruPost struct {
 	ImageWidth int `json:"width"`
 	ImageHeight int `json:"height"`
 	FileUrl string `json:"file_url"`
-    Directory string `json:"directory"`
-    Hash string `json:"hash"`
+	Directory string `json:"directory"`
+	Hash string `json:"hash"`
+	Sample bool `json:"sample"`
 }
 
 func (self *gelbooruPost) toBooruPost() BooruPost {
+	var PreviewFileUrl string
+	if self.Sample {
+		PreviewFileUrl = fmt.Sprintf("https://img2.gelbooru.com/samples/%s/sample_%s.jpg", self.Directory, self.Hash)
+	} else {
+		PreviewFileUrl = self.FileUrl
+	}
 	booru_post := BooruPost {
 		Source: "Gelbooru",
 		ID: self.ID,
 		URL: fmt.Sprintf("https://gelbooru.com/index.php?page=post&s=view&id=%d", self.ID),
-		PreviewFileUrl: fmt.Sprintf("https://img2.gelbooru.com/samples/%s/sample_%s.jpg", self.Directory, self.Hash),
+		PreviewFileUrl: PreviewFileUrl,
 		FileUrl: self.FileUrl,
 		ImageWidth: self.ImageWidth,
 		ImageHeight: self.ImageHeight,
