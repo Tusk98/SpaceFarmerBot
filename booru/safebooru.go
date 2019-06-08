@@ -12,19 +12,27 @@ type safebooruPost struct {
 	ID int `json:"id"`
 	ImageWidth int `json:"width"`
 	ImageHeight int `json:"height"`
-	FileUrl string `json:"file_url"`
-    Directory string `json:"directory"`
-    Hash string `json:"hash"`
-    Image string `josn:"image"`
+	Directory string `json:"directory"`
+	Hash string `json:"hash"`
+	Image string `json:"image"`
+	Sample bool `json:"sample"`
 }
 
 func (self *safebooruPost) toBooruPost() BooruPost {
+	FileUrl := fmt.Sprintf("https://safebooru.org/images/%s/%s", self.Directory, self.Image)
+	var PreviewFileUrl string
+	if self.Sample {
+		PreviewFileUrl = fmt.Sprintf("https://safebooru.org/samples/%s/sample_%s.jpg", self.Directory, self.Hash)
+	} else {
+		PreviewFileUrl = FileUrl
+	}
+
 	booru_post := BooruPost {
 		Source: "Safebooru",
 		ID: self.ID,
 		URL: fmt.Sprintf("https://safebooru.org/index.php?page=post&s=view&id=%d", self.ID),
-		PreviewFileUrl: fmt.Sprintf("https://safebooru.org/samples/%s/sample_%s.jpg", self.Directory, self.Hash),
-		FileUrl: fmt.Sprintf("https://safebooru.org/images/%s/%s", self.Directory, self.Image),
+		PreviewFileUrl: PreviewFileUrl,
+		FileUrl: FileUrl,
 		ImageWidth: self.ImageWidth,
 		ImageHeight: self.ImageHeight,
 	}

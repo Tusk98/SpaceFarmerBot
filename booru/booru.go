@@ -2,7 +2,7 @@ package booru
 
 import (
 	"fmt"
-	"strings"
+	"math/rand" 
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -41,19 +41,66 @@ func (self *UnknownBooruError) Error() string {
 	return self.arg
 }
 
+const BOORUS_SUPPORTED uint = 5
+const (
+		Danbooru	= iota
+		Gelbooru	= iota
+		Konachan	= iota
+		Safebooru	= iota
+		Yandere		= iota
+)
 
-func BooruGetLatest(args string) (BooruPost, error) {
-	if strings.HasPrefix(args, "danbooru") {
-		return DanbooruLatestPost()
-	} else if strings.HasPrefix(args, "yandere") {
-		return YandereLatestPost()
-	} else if strings.HasPrefix(args, "konachan") {
-        return KonachanLatestPost()
-    } else if strings.HasPrefix(args, "safebooru") {
-        return SafebooruLatestPost()
-    } else if strings.HasPrefix(args, "gelbooru") {
-        return GelbooruLatestPost()
-    } else {
-		return BooruPost{}, &UnknownBooruError { arg: args }
+func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
+	if args == "" {
+		booru := uint(rand.Int()) % BOORUS_SUPPORTED
+		post, err := BooruGetLatest(booru)
+		if err != nil {
+			return err
+		}
+		embed := post.ToDiscordEmbed()
+		s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	} else if args == "all" {
+		for i := 0; uint(i) < BOORUS_SUPPORTED; i++ {
+			post, err := BooruGetLatest(uint(i))
+			if err != nil {
+				return err
+			}
+			embed := post.ToDiscordEmbed()
+			s.ChannelMessageSendEmbed(m.ChannelID, embed)
+		}
+	} else {
+		booru, err := parseBooruType(args)
+		if err != nil {
+			return err
+		}
+		post, err := BooruGetLatest(booru)
+		if err != nil {
+			return err
+		}
+		embed := post.ToDiscordEmbed()
+		s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	}
+	return nil
+}
+
+func parseBooruType(arg string) (uint, error) {
+	switch arg {
+	case "danbooru": return Danbooru, nil
+	case "yandere": return Yandere, nil
+	case "konachan": return Konachan, nil
+	case "safebooru": return Safebooru, nil
+	case "gelbooru": return Gelbooru, nil
+	default: return 100, &UnknownBooruError { arg: arg }
+	}
+}
+
+func BooruGetLatest(booru uint) (BooruPost, error) {
+	switch booru {
+	case Danbooru: return DanbooruLatestPost()
+	case Yandere: return YandereLatestPost()
+	case Konachan: return KonachanLatestPost()
+	case Safebooru: return SafebooruLatestPost()
+	case Gelbooru: return GelbooruLatestPost()
+	default: return BooruPost{}, &UnknownBooruError { arg: "" }
 	}
 }
