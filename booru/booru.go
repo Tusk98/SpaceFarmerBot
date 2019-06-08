@@ -47,7 +47,11 @@ func BooruGetLatest(args string) (BooruPost, error) {
 		return DanbooruLatestPost()
 	} else if strings.HasPrefix(args, "yandere") {
 		return YandereLatestPost()
-	} else {
+	} else if strings.HasPrefix(args, "konachan") {
+        return KonachanLatestPost()
+    } else if strings.HasPrefix(args, "safebooru") {
+        return SafebooruLatestPost()
+    } else {
 		return BooruPost{}, &UnknownBooruError { arg: args }
 	}
 }
