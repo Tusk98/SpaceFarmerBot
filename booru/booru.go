@@ -2,8 +2,17 @@ package booru
 
 import (
 	"fmt"
-	"math/rand" 
+	"math/rand"
 	"github.com/bwmarrin/discordgo"
+)
+
+const BOORUS_SUPPORTED uint = 5
+const (
+	Danbooru	= iota
+	Gelbooru	= iota
+	Konachan	= iota
+	Safebooru	= iota
+	Yandere		= iota
 )
 
 type BooruPost struct {
@@ -15,14 +24,8 @@ type BooruPost struct {
 	ImageWidth int
 	ImageHeight int
 }
-
-func (self *BooruPost) GetPreviewUrl() string {
-	return self.PreviewFileUrl
-}
-
-const COLOR int = 0xff93ac
-
 func (self *BooruPost) ToDiscordEmbed() *discordgo.MessageEmbed {
+	const COLOR int = 0xff93ac
 	return &discordgo.MessageEmbed {
 		Title: fmt.Sprintf("%s: #%d", self.Source, self.ID),
 		Color: COLOR,
@@ -36,19 +39,9 @@ func (self *BooruPost) ToDiscordEmbed() *discordgo.MessageEmbed {
 type UnknownBooruError struct {
 	arg string
 }
-
 func (self *UnknownBooruError) Error() string {
 	return self.arg
 }
-
-const BOORUS_SUPPORTED uint = 5
-const (
-		Danbooru	= iota
-		Gelbooru	= iota
-		Konachan	= iota
-		Safebooru	= iota
-		Yandere		= iota
-)
 
 func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
 	if args == "" {
@@ -101,6 +94,6 @@ func BooruGetLatest(booru uint) (BooruPost, error) {
 	case Konachan: return KonachanLatestPost()
 	case Safebooru: return SafebooruLatestPost()
 	case Gelbooru: return GelbooruLatestPost()
-	default: return BooruPost{}, &UnknownBooruError { arg: "" }
+	default: return BooruPost{}, &UnknownBooruError {}
 	}
 }
