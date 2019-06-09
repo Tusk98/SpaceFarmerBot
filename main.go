@@ -10,6 +10,7 @@ import (
 	"github.com/adrg/xdg"
 	"github.com/bwmarrin/discordgo"
 	"github.com/pelletier/go-toml"
+	"github.com/Tusk98/SpaceFarmerBot/ball"
 	"github.com/Tusk98/SpaceFarmerBot/booru"
 )
 
@@ -44,13 +45,25 @@ func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 	msg := m.Content[len(COMMAND_PREFIX):]
-	const booru_command string = "daily"
-	if strings.HasPrefix(msg, booru_command) {
-		args := strings.TrimSpace(msg[len(booru_command):])
-		err := booru.ProcessCommand(s, m, args)
-		if err != nil {
-			s.ChannelMessageSend(m.ChannelID, err.Error())
-		}
+	slice_ind := strings.Index(m.Content, " ")
+	var command, args string
+	if slice_ind != -1 {
+		command = msg[:slice_ind-1]
+		args = msg[slice_ind:]
+	} else {
+		command = msg
+		args = ""
+	}
+	fmt.Printf("cmd: \"%s\"\nargs: \"%s\"\n", command, args)
+
+	var err error = nil
+	switch command {
+	case booru.Command: err = booru.ProcessCommand(s, m, args)
+	case ball.Command: err = ball.ProcessCommand(s, m, args)
+	}
+
+	if err != nil {
+		s.ChannelMessageSend(m.ChannelID, err.Error())
 	}
 }
 
