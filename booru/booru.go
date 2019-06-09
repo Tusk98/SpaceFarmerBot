@@ -73,7 +73,6 @@ func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args strin
         if err != nil {
             return err
         }
-        fmt.Printf("%+v\n", post)
         embed := post.ToDiscordEmbed()
         s.ChannelMessageSendEmbed(m.ChannelID, embed)
     }
