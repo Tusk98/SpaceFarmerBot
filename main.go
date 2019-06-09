@@ -26,6 +26,13 @@ type Config struct {
 	Bot BotConfig
 }
 
+type UnknownCommandError struct {
+	arg string
+}
+func (self *UnknownCommandError) Error() string {
+	return self.arg
+}
+
 
 func onReady(discord *discordgo.Session, ready *discordgo.Ready) {
 	err := discord.UpdateStatus(0, "A friendly helpful bot!")
@@ -41,12 +48,19 @@ func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
+	// do nothing if message does not start with command invoking string
 	if !strings.HasPrefix(m.Content, COMMAND_PREFIX) {
 		return
 	}
+
 	msg := m.Content[len(COMMAND_PREFIX):]
 	slice_ind := strings.Index(m.Content, " ")
-	// sliced as a space e.g.
+
+	/* sliced as a space
+	 * e.g. "!8ball   answer my question " becomes:
+	 *    command = "8ball"
+	 *    args = "answer my question"
+	 */	
 	var command, args string
 	if slice_ind != -1 {
 		command = msg[:slice_ind-1]
@@ -58,9 +72,13 @@ func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	fmt.Printf("cmd: \"%s\"\nargs: \"%s\"\n", command, args)
 
 	var err error = nil
+
+	// check for valid commands
 	switch command {
 	case booru.Command: err = booru.ProcessCommand(s, m, args)
 	case ball.Command: err = ball.ProcessCommand(s, m, args)
+	// unknown command
+	default: err = &UnknownCommandError { arg: fmt.Sprintf("Unknown Command: %s", command) }
 	}
 
 	if err != nil {
