@@ -46,10 +46,11 @@ func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 	msg := m.Content[len(COMMAND_PREFIX):]
 	slice_ind := strings.Index(m.Content, " ")
+	// sliced as a space e.g.
 	var command, args string
 	if slice_ind != -1 {
 		command = msg[:slice_ind-1]
-		args = msg[slice_ind:]
+		args = strings.TrimSpace(msg[slice_ind:])
 	} else {
 		command = msg
 		args = ""
