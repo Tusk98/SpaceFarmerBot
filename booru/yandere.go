@@ -32,19 +32,14 @@ func (self *yanderePost) toBooruPost() BooruPost {
 func YandereLatestPost() (BooruPost, error) {
     const api_url = "https://yande.re/post.json?limit=1"
 
-    spaceClient := http.Client{Timeout: time.Second * 5}
-    req, err := http.NewRequest(http.MethodGet, api_url, nil)
+    spaceClient := http.Client{Timeout: time.Second * 10}
+    resp, err := spaceClient.Get(api_url)
+
     if err != nil {
         return BooruPost{}, err
     }
-    req.Header.Set("User-Agent", "SpaceFarmerBot")
 
-    res, getErr := spaceClient.Do(req)
-    if getErr != nil {
-        return BooruPost{}, getErr
-    }
-
-    json_content, readErr := ioutil.ReadAll(res.Body)
+    json_content, readErr := ioutil.ReadAll(resp.Body)
     if readErr != nil {
         return BooruPost{}, readErr
     }
