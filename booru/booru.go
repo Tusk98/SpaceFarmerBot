@@ -6,6 +6,10 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+const Command string = "daily"
+
+
+const COLOR int = 0xff93ac
 const BOORUS_SUPPORTED uint = 5
 const (
 	Danbooru	= iota
@@ -25,7 +29,6 @@ type BooruPost struct {
 	ImageHeight int
 }
 func (self *BooruPost) ToDiscordEmbed() *discordgo.MessageEmbed {
-	const COLOR int = 0xff93ac
 	return &discordgo.MessageEmbed {
 		Title: fmt.Sprintf("%s: #%d", self.Source, self.ID),
 		Color: COLOR,
@@ -70,6 +73,7 @@ func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args strin
 		if err != nil {
 			return err
 		}
+		fmt.Printf("%+v\n", post)
 		embed := post.ToDiscordEmbed()
 		s.ChannelMessageSendEmbed(m.ChannelID, embed)
 	}
@@ -83,7 +87,7 @@ func parseBooruType(arg string) (uint, error) {
 	case "konachan": return Konachan, nil
 	case "safebooru": return Safebooru, nil
 	case "gelbooru": return Gelbooru, nil
-	default: return 100, &UnknownBooruError { arg: arg }
+	default: return 100, &UnknownBooruError { arg: fmt.Sprintf("Unknown argument: %s", arg) }
 	}
 }
 

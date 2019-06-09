@@ -32,7 +32,7 @@ func (self *danbooruPost) toBooruPost() BooruPost {
 func DanbooruLatestPost() (BooruPost, error) {
 	const api_url = "https://danbooru.donmai.us/posts.json?limit=1"
 
-	spaceClient := http.Client{Timeout: time.Second * 2}
+	spaceClient := http.Client{Timeout: time.Second * 5}
 	req, err := http.NewRequest(http.MethodGet, api_url, nil)
 	if err != nil {
 		return BooruPost{}, err

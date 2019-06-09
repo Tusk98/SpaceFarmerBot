@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -22,7 +23,9 @@ func (self *safebooruPost) toBooruPost() BooruPost {
 	FileUrl := fmt.Sprintf("https://safebooru.org/images/%s/%s", self.Directory, self.Image)
 	var PreviewFileUrl string
 	if self.Sample {
-		PreviewFileUrl = fmt.Sprintf("https://safebooru.org/samples/%s/sample_%s.jpg", self.Directory, self.Hash)
+		slice_ind := strings.Index(self.Image, ".")
+		image_name := self.Image[:slice_ind]
+		PreviewFileUrl = fmt.Sprintf("https://safebooru.org/samples/%s/sample_%s.jpg", self.Directory, image_name)
 	} else {
 		PreviewFileUrl = FileUrl
 	}
@@ -42,7 +45,7 @@ func (self *safebooruPost) toBooruPost() BooruPost {
 func SafebooruLatestPost() (BooruPost, error) {
 	const api_url = "https://safebooru.org/index.php?page=dapi&s=post&q=index&json=1&limit=1"
 
-	spaceClient := http.Client{Timeout: time.Second * 2}
+	spaceClient := http.Client{Timeout: time.Second * 5}
 	req, err := http.NewRequest(http.MethodGet, api_url, nil)
 	if err != nil {
 		return BooruPost{}, err

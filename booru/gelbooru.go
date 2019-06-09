@@ -40,7 +40,7 @@ func (self *gelbooruPost) toBooruPost() BooruPost {
 func GelbooruLatestPost() (BooruPost, error) {
 	const api_url = "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&limit=1"
 
-	spaceClient := http.Client{Timeout: time.Second * 2}
+	spaceClient := http.Client{Timeout: time.Second * 5}
 	req, err := http.NewRequest(http.MethodGet, api_url, nil)
 	if err != nil {
 		return BooruPost{}, err
