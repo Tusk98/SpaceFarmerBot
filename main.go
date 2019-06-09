@@ -55,7 +55,7 @@ func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
     }
 
     msg := m.Content[len(COMMAND_PREFIX):]
-    slice_ind := strings.Index(m.Content, " ")
+    slice_ind := strings.IndexRune(m.Content, ' ')
 
     /* sliced as a space
      * e.g. "!8ball   answer my question " becomes:
@@ -78,7 +78,7 @@ func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
     switch command {
     case booru.Command: err = booru.ProcessCommand(s, m, args)
     case ball.Command: err = ball.ProcessCommand(s, m, args)
-    case sauce.Command: err = ball.ProcessCommand(s, m, args)
+    case sauce.Command: err = sauce.ProcessCommand(s, m, args)
     // unknown command
     default: err = &UnknownCommandError {
             arg: fmt.Sprintf("Unknown Command: %s", command),
