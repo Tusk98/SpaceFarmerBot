@@ -9,7 +9,7 @@ const Command string = "8ball"
 
 const COLOR int = 0xff93ac
 
-var answers []string = []string{
+var _ANSWERS = [...]string{
 	// yes like answers
 	"Yes",
 	"It is certain",
@@ -38,13 +38,13 @@ func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args strin
     if args == "" {
         s.ChannelMessageSend(m.ChannelID, "No questions? Back to farming...")
     } else {
-        msg_index := rand.Int() % len(answers)
+        msg_index := rand.Int() % len(_ANSWERS)
         embed := &discordgo.MessageEmbed {
             Title: "Question",
             Color: COLOR,
             Description: args,
             Fields: []*discordgo.MessageEmbedField{
-                { Name: "Answer", Value: answers[msg_index] },
+                { Name: "Answer", Value: _ANSWERS[msg_index] },
             },
         }
         s.ChannelMessageSendEmbed(m.ChannelID, embed)

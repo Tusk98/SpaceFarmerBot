@@ -15,8 +15,8 @@ const (
     Danbooru    = iota
     Gelbooru    = iota
     Konachan    = iota
-    Safebooru    = iota
-    Yandere        = iota
+    Safebooru   = iota
+    Yandere     = iota
 )
 
 type BooruPost struct {
@@ -47,46 +47,58 @@ func (self *UnknownBooruError) Error() string {
 }
 
 func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
-    if args == "help" {
-        embed := &discordgo.MessageEmbed {
-            Title: "daily usage",
-            Color: COLOR,
-            Description: "Usage: daily [OPTIONS]",
-            Fields: []*discordgo.MessageEmbedField{
-                { Name: "danbooru", Value: "fetches latest image on danbooru" },
-            },
-        }
-        s.ChannelMessageSendEmbed(m.ChannelID, embed)
-        return nil
-    } else if args == "" {
-        booru := uint(rand.Int()) % BOORUS_SUPPORTED
-        post, err := BooruGetLatest(booru)
-        if err != nil {
-            return err
-        }
-        embed := post.ToDiscordEmbed()
-        s.ChannelMessageSendEmbed(m.ChannelID, embed)
-    } else if args == "all" {
-        for i := 0; uint(i) < BOORUS_SUPPORTED; i++ {
-            post, err := BooruGetLatest(uint(i))
+    switch args {
+        case "help": return HelpMessage(s, m)
+        case "": {
+            booru := uint(rand.Int()) % BOORUS_SUPPORTED
+            post, err := BooruGetLatest(booru)
             if err != nil {
                 return err
             }
             embed := post.ToDiscordEmbed()
             s.ChannelMessageSendEmbed(m.ChannelID, embed)
         }
-    } else {
-        booru, err := parseBooruType(args)
-        if err != nil {
-            return err
+        case "all": {
+            for i := 0; uint(i) < BOORUS_SUPPORTED; i++ {
+                post, err := BooruGetLatest(uint(i))
+                if err != nil {
+                    return err
+                }
+                embed := post.ToDiscordEmbed()
+                s.ChannelMessageSendEmbed(m.ChannelID, embed)
+            }
         }
-        post, err := BooruGetLatest(booru)
-        if err != nil {
-            return err
+        default: {
+            booru, err := parseBooruType(args)
+            if err != nil {
+                return err
+            }
+            post, err := BooruGetLatest(booru)
+            if err != nil {
+                return err
+            }
+            embed := post.ToDiscordEmbed()
+            s.ChannelMessageSendEmbed(m.ChannelID, embed)
         }
-        embed := post.ToDiscordEmbed()
-        s.ChannelMessageSendEmbed(m.ChannelID, embed)
     }
+    return nil
+}
+
+func HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate) error {
+    embed := &discordgo.MessageEmbed {
+        Title: "daily usage",
+        Color: COLOR,
+        Description: "Usage: daily [OPTIONS]\nFetches the latest image from a random source",
+        Fields: []*discordgo.MessageEmbedField{
+            { Name: "all", Value: "fetches all the latest images from supported platforms" },
+            { Name: "danbooru", Value: "fetches the latest image from danbooru" },
+            { Name: "gelbooru", Value: "fetches latest image on gelbooru" },
+            { Name: "konachan", Value: "fetches latest image on konachan" },
+            { Name: "safebooru", Value: "fetches latest image on safebooru" },
+            { Name: "yandere", Value: "fetches latest image on yandere" },
+        },
+    }
+    s.ChannelMessageSendEmbed(m.ChannelID, embed)
     return nil
 }
 
