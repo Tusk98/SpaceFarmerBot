@@ -26,14 +26,14 @@ var _STATUS_VALUES []string = []string {
     "Headpatting noggles",
 }
 
-
+/* toml structs */
 type BotConfig struct {
     Token string
 }
-
 type Config struct {
     Bot BotConfig
 }
+
 
 type UnknownCommandError struct {
     arg string
@@ -120,33 +120,38 @@ func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func main() {
+    /* get config path */
     config_path, err := xdg.SearchConfigFile(CONFIG_PATH)
     if err != nil {
         fmt.Println("Failed to find config file:", err)
         return
     }
+
+    /* read config data */
     toml_data, err := ioutil.ReadFile(config_path)
     if err != nil {
         fmt.Println("Failed to read config file:", err)
         return
     }
 
+    /* parse config data */
     var config Config
     if err := toml.Unmarshal(toml_data, &config); err != nil {
         fmt.Println("Failed to parse config file:", err)
         return
     }
+
     var Token = config.Bot.Token
     fmt.Println("Token", Token)
 
-    // Create a new Discord session using the provided bot token.
+    /* Create a new Discord session using the provided bot token. */
     dg, err := discordgo.New("Bot " + Token)
     if err != nil {
         fmt.Println("error creating Discord session,", err)
         return
     }
 
-    // Register the messageCreate func as a callback for MessageCreate events.
+    /* Register functions as a callback for MessageCreate events */
     dg.AddHandler(onReady)
     dg.AddHandler(commandHandler)
 
