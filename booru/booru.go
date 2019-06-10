@@ -47,7 +47,18 @@ func (self *UnknownBooruError) Error() string {
 }
 
 func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
-    if args == "" {
+    if args == "help" {
+        embed := &discordgo.MessageEmbed {
+            Title: "daily usage",
+            Color: COLOR,
+            Description: "Usage: daily [OPTIONS]",
+            Fields: []*discordgo.MessageEmbedField{
+                { Name: "danbooru", Value: "fetches latest image on danbooru" },
+            },
+        }
+        s.ChannelMessageSendEmbed(m.ChannelID, embed)
+        return nil
+    } else if args == "" {
         booru := uint(rand.Int()) % BOORUS_SUPPORTED
         post, err := BooruGetLatest(booru)
         if err != nil {
