@@ -3,6 +3,7 @@ package main
 import (
     "fmt"
     "io/ioutil"
+    "math/rand"
     "strings"
     "os"
     "os/signal"
@@ -16,8 +17,15 @@ import (
 )
 
 const CONFIG_PATH string = "SpaceFarmerBot/config.toml"
-const COMMAND_PREFIX string = "!"
+const COMMAND_PREFIX string = "+"
 const COLOR int = 0xff93ac
+
+var _STATUS_VALUES []string = []string {
+    "Space farming for argon crystals",
+    "Failing sortie spy",
+    "Headpatting noggles",
+}
+
 
 type BotConfig struct {
     Token string
@@ -34,9 +42,26 @@ func (self *UnknownCommandError) Error() string {
     return self.arg
 }
 
+func HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
+    embed := &discordgo.MessageEmbed {
+        Title: "SpaceFarmerBot Usage",
+        Color: COLOR,
+        Description: fmt.Sprintf("%scommand arguments", COMMAND_PREFIX),
+        Fields: []*discordgo.MessageEmbedField{
+            // please keep in alphanumeric order
+            { Name: "8ball", Value: "ask a question and it will be answered with a yes or no" },
+            { Name: "daily", Value: "fetches latest image from supported websites" },
+            { Name: "sauce", Value: "provide some images and sources for them will be found" },
+        },
+    }
+    s.ChannelMessageSendEmbed(m.ChannelID, embed)
+    return nil
+}
 
 func onReady(discord *discordgo.Session, ready *discordgo.Ready) {
-    err := discord.UpdateStatus(0, "A friendly helpful bot!")
+    status_ind := rand.Int() % len(_STATUS_VALUES)
+    status := _STATUS_VALUES[status_ind]
+    err := discord.UpdateStatus(0, status)
     if err != nil {
         fmt.Println("Error attempting to set bot status:", err)
     }
@@ -76,13 +101,17 @@ func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
     // check for valid commands
     switch command {
+    case "help": err = HelpMessage(s, m, args)
     case booru.Command: err = booru.ProcessCommand(s, m, args)
     case ball.Command: err = ball.ProcessCommand(s, m, args)
     case sauce.Command: err = sauce.ProcessCommand(s, m, args)
     // unknown command
+    default: err = nil
+/*
     default: err = &UnknownCommandError {
             arg: fmt.Sprintf("Unknown Command: %s", command),
         }
+*/
     }
 
     if err != nil {
