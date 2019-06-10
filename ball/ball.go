@@ -1,7 +1,6 @@
 package ball
 
 import (
-    "fmt"
     "math/rand"
     "github.com/bwmarrin/discordgo"
 )
@@ -43,15 +42,17 @@ var answers []string = []string {
 }
 
 func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
-
     if args == "" {
         s.ChannelMessageSend(m.ChannelID, "No questions? Back to farming...")
     } else {
         msg_index := rand.Int() % len(answers)
         embed := &discordgo.MessageEmbed {
-            Title: fmt.Sprintf("Question: %s", args),
+            Title: "Question",
             Color: COLOR,
-            Description: fmt.Sprintf("Answer: %s", answers[msg_index]),
+            Description: args,
+            Fields: []*discordgo.MessageEmbedField{
+                { Name: "Answer", Value: answers[msg_index] },
+            },
         }
         s.ChannelMessageSendEmbed(m.ChannelID, embed)
     }
