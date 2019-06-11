@@ -6,8 +6,8 @@ import (
     "github.com/bwmarrin/discordgo"
 )
 
-const Command string = "daily"
-
+const COMMAND string = "daily"
+const DESCRIPTION string = "fetches latest image from supported websites"
 
 const COLOR int = 0xff93ac
 const BOORUS_SUPPORTED uint = 5
@@ -46,6 +46,24 @@ func (self *UnknownBooruError) Error() string {
     return self.arg
 }
 
+func HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate) error {
+    embed := &discordgo.MessageEmbed {
+        Title: "daily usage",
+        Color: COLOR,
+        Description: fmt.Sprintf("Usage: daily [OPTIONS]\n%s", DESCRIPTION),
+        Fields: []*discordgo.MessageEmbedField{
+            { Name: "all", Value: "fetches all the latest images from supported platforms" },
+            { Name: "danbooru", Value: "fetches the latest image from danbooru" },
+            { Name: "gelbooru", Value: "fetches latest image on gelbooru" },
+            { Name: "konachan", Value: "fetches latest image on konachan" },
+            { Name: "safebooru", Value: "fetches latest image on safebooru" },
+            { Name: "yandere", Value: "fetches latest image on yandere" },
+        },
+    }
+    s.ChannelMessageSendEmbed(m.ChannelID, embed)
+    return nil
+}
+
 func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
     switch args {
         case "help": return HelpMessage(s, m)
@@ -81,24 +99,6 @@ func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args strin
             s.ChannelMessageSendEmbed(m.ChannelID, embed)
         }
     }
-    return nil
-}
-
-func HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate) error {
-    embed := &discordgo.MessageEmbed {
-        Title: "daily usage",
-        Color: COLOR,
-        Description: "Usage: daily [OPTIONS]\nFetches the latest image from a random source",
-        Fields: []*discordgo.MessageEmbedField{
-            { Name: "all", Value: "fetches all the latest images from supported platforms" },
-            { Name: "danbooru", Value: "fetches the latest image from danbooru" },
-            { Name: "gelbooru", Value: "fetches latest image on gelbooru" },
-            { Name: "konachan", Value: "fetches latest image on konachan" },
-            { Name: "safebooru", Value: "fetches latest image on safebooru" },
-            { Name: "yandere", Value: "fetches latest image on yandere" },
-        },
-    }
-    s.ChannelMessageSendEmbed(m.ChannelID, embed)
     return nil
 }
 

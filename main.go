@@ -21,19 +21,25 @@ const COMMAND_PREFIX string = "+"
 const COLOR int = 0xff93ac
 
 var _STATUS_VALUES []string = []string {
-    "Space farming for argon crystals",
+    "Bargaining Maroo",
     "Failing sortie spy",
+    "Finding Kurias",
     "Headpatting noggles",
+    "Helping Clem",
+    "Looking for frost leaves",
+    "Sabotaging Vay Hek's plans",
+    "Shopping for syandanas",
+    "Space farming argon crystals",
+    "Unveiling rivens",
 }
 
 /* toml structs */
-type BotConfig struct {
-    Token string
-}
 type Config struct {
     Bot BotConfig
 }
-
+type BotConfig struct {
+    Token string
+}
 
 type UnknownCommandError struct {
     arg string
@@ -49,9 +55,9 @@ func HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate, args string) 
         Description: fmt.Sprintf("%scommand arguments", COMMAND_PREFIX),
         Fields: []*discordgo.MessageEmbedField{
             // please keep in alphanumeric order
-            { Name: "8ball", Value: "ask a question and it will be answered with a yes or no" },
-            { Name: "daily", Value: "fetches latest image from supported websites" },
-            { Name: "sauce", Value: "provide some images and sources for them will be found" },
+            { Name: ball.COMMAND, Value: ball.DESCRIPTION },
+            { Name: booru.COMMAND, Value: booru.DESCRIPTION },
+            { Name: sauce.COMMAND, Value: sauce.DESCRIPTION },
         },
     }
     s.ChannelMessageSendEmbed(m.ChannelID, embed)
@@ -80,14 +86,14 @@ func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
     }
 
     msg := m.Content[len(COMMAND_PREFIX):]
-    slice_ind := strings.IndexRune(m.Content, ' ')
 
     /* sliced as a space
-     * e.g. "!8ball   answer my question " becomes:
+     * e.g. "+8ball   answer my question " becomes:
      *    command = "8ball"
      *    args = "answer my question"
      */
     var command, args string
+    slice_ind := strings.IndexRune(m.Content, ' ')
     if slice_ind != -1 {
         command = msg[:slice_ind-1]
         args = strings.TrimSpace(msg[slice_ind:])
@@ -102,9 +108,9 @@ func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
     // check for valid commands
     switch command {
     case "help": err = HelpMessage(s, m, args)
-    case booru.Command: err = booru.ProcessCommand(s, m, args)
-    case ball.Command: err = ball.ProcessCommand(s, m, args)
-    case sauce.Command: err = sauce.ProcessCommand(s, m, args)
+    case booru.COMMAND: err = booru.ProcessCommand(s, m, args)
+    case ball.COMMAND: err = ball.ProcessCommand(s, m, args)
+    case sauce.COMMAND: err = sauce.ProcessCommand(s, m, args)
     // unknown command
     default: err = nil
 /*

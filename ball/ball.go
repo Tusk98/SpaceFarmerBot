@@ -5,8 +5,8 @@ import (
     "github.com/bwmarrin/discordgo"
 )
 
-const Command string = "8ball"
-
+const COMMAND string = "8ball"
+const DESCRIPTION string = "ask a question and it will be answered with a yes or no"
 const COLOR int = 0xff93ac
 
 var _ANSWERS = [...]string{

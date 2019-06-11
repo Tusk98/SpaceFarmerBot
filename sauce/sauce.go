@@ -10,6 +10,11 @@ import (
     "github.com/bwmarrin/discordgo"
 )
 
+const COMMAND string = "sauce"
+const DESCRIPTION string = "provide some images and sources for them will be found"
+
+const COLOR int = 0xff93ac
+
 type GenericBotError struct {
     reason string
 }
@@ -24,8 +29,6 @@ type SimilarityResult struct {
     Width uint
 }
 
-const Command string = "sauce"
-const COLOR int = 0xff93ac
 
 const IQDB_PATTERN string = "match</th></tr><tr><td class='image'><a href=\""
 const IQDB_DIMENSION_PATTERN string = "class=\"service-icon\">"
