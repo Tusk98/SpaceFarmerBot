@@ -6,7 +6,7 @@
 </p>
 
 ## Dependencies
- - golang
+ - golang (preferably 1.12+)
    - [discord-go](https://github.com/bwmarrin/discordgo)
    - [go-toml](https://github.com/pelletier/go-toml)
    - [xdg](https://github.com/adrg/xdg)
@@ -19,11 +19,16 @@ Place config files inside `$XDG_CONFIG_HOME/SpaceFarmerBot` (usually `$HOME/.con
 ## Installing
 Please make sure your go environment is set up.
 ```
-~ $ go install github.com/Tusk98/SpaceFarmerBot
+~ $ cd SpaceFarmerBot
+~ $ go install .
 ```
 ## Running
 ```
-~ $ SpaceFarmerBot
+~ $ go run .
+~ $ SpaceFarmerBot    # or if $GOPATH/bin is in your $PATH
 ```
 
 ## Features
+ - 8ball: ask a question and it will be answered with a yes or no
+ - daily: fetches latest image from supported websites
+ - sauce: provide some images and sources for them will be found
