@@ -13,6 +13,7 @@ import (
     "github.com/pelletier/go-toml"
     "github.com/Tusk98/SpaceFarmerBot/ball"
     "github.com/Tusk98/SpaceFarmerBot/booru"
+    "github.com/Tusk98/SpaceFarmerBot/event"
     "github.com/Tusk98/SpaceFarmerBot/sauce"
 )
 
@@ -21,7 +22,9 @@ const COMMAND_PREFIX string = "+"
 const COLOR int = 0xff93ac
 
 var _STATUS_VALUES []string = []string {
-    "Bargaining Maroo",
+    "Bargaining with Maroo",
+    "Completing the codex",
+    "Extracting Nitain",
     "Failing sortie spy",
     "Finding Kurias",
     "Headpatting noggles",
@@ -73,6 +76,19 @@ func onReady(discord *discordgo.Session, ready *discordgo.Ready) {
     }
 }
 
+func reactHandler(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
+    origMessage, err := s.ChannelMessage(m.MessageReaction.ChannelID, m.MessageReaction.MessageID)
+    if err != nil {
+        return
+    }
+
+    if origMessage.Author.ID != s.State.User.ID {
+        return
+    }
+
+    s.ChannelMessageSend(m.ChannelID, origMessage.Content)
+}
+
 // This function will be called (due to AddHandler above) every time a new
 // message is created on any channel that the autenticated bot has access to.
 func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -110,6 +126,7 @@ func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
     case "help": err = HelpMessage(s, m, args)
     case booru.COMMAND: err = booru.ProcessCommand(s, m, args)
     case ball.COMMAND: err = ball.ProcessCommand(s, m, args)
+    case event.COMMAND: err = event.ProcessCommand(s, m, args)
     case sauce.COMMAND: err = sauce.ProcessCommand(s, m, args)
     // unknown command
     default: err = nil
@@ -160,6 +177,7 @@ func main() {
     /* Register functions as a callback for MessageCreate events */
     dg.AddHandler(onReady)
     dg.AddHandler(commandHandler)
+    dg.AddHandler(reactHandler)
 
     // Open a websocket connection to Discord and begin listening.
     err = dg.Open()

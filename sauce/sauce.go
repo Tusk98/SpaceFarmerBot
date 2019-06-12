@@ -33,13 +33,27 @@ type SimilarityResult struct {
 const IQDB_PATTERN string = "match</th></tr><tr><td class='image'><a href=\""
 const IQDB_DIMENSION_PATTERN string = "class=\"service-icon\">"
 
+func HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate) error {
+    embed := &discordgo.MessageEmbed {
+        Title: "sauce usage",
+        Color: COLOR,
+        Description: fmt.Sprintf("Usage: daily file1 file2 ...\n%s", DESCRIPTION),
+    }
+    s.ChannelMessageSendEmbed(m.ChannelID, embed)
+    return nil
+}
+
 func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
     if len(m.Attachments) == 0 && len(args) == 0 {
         s.ChannelMessageSend(m.ChannelID, "No images/links to work off of? Back to farming...")
         return nil
     }
+    arg_lst := strings.Split(args, " ")
+    if arg_lst[0] == "help" {
+        return HelpMessage(s, m)
+    }
 
-    for _, arg := range strings.Split(args, " ") {
+    for _, arg := range arg_lst {
         if len(arg) <= 6 || !strings.HasPrefix(arg, "http") {
             continue
         }
