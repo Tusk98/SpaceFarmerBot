@@ -6,7 +6,7 @@
 </p>
 
 ## Dependencies
- - golang (preferably 1.12+)
+ - golang (preferably 1.12+, older versions require you to manually download dependencies via `go get`)
    - [discord-go](https://github.com/bwmarrin/discordgo)
    - [go-toml](https://github.com/pelletier/go-toml)
    - [xdg](https://github.com/adrg/xdg)
