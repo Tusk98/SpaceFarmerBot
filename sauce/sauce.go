@@ -1,7 +1,6 @@
 package sauce
 
 import (
-    "bytes"
     "fmt"
     "net/http"
     "net/url"
@@ -53,12 +52,9 @@ func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args strin
         return HelpMessage(s, m)
     }
 
-    for _, arg := range arg_lst {
-        if len(arg) <= 6 || !strings.HasPrefix(arg, "http") {
-            continue
-        }
-
-        results, err := getSimilarResults(arg)
+    for _, attachment := range m.Attachments {
+        img_url := attachment.URL
+        results, err := getSimilarResults(img_url)
         if err != nil {
             return err
         }
@@ -67,7 +63,6 @@ func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args strin
             continue
         }
 
-        var buffer bytes.Buffer
         fields := []*discordgo.MessageEmbedField{}
         for i, result := range results {
             field := &discordgo.MessageEmbedField{
@@ -80,30 +75,44 @@ func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args strin
         embed := &discordgo.MessageEmbed {
                 Title: "Results",
                 Color: COLOR,
-                Description: buffer.String(),
-                Thumbnail: &discordgo.MessageEmbedThumbnail{
-                    URL: arg,
+                Thumbnail: &discordgo.MessageEmbedThumbnail {
+                    URL: img_url,
                 },
                 Fields: fields,
             }
         s.ChannelMessageSendEmbed(m.ChannelID, embed)
     }
 
-    for _, attachment := range m.Attachments {
-        results, err := getSimilarResults(attachment.URL)
+    for _, img_url := range arg_lst {
+        if len(img_url) <= 6 || !strings.HasPrefix(img_url, "http") {
+            continue
+        }
+
+        results, err := getSimilarResults(img_url)
         if err != nil {
             return err
         }
-
-        var buffer bytes.Buffer
-        for _, result := range results {
-            buffer.WriteString(result.URL)
-            buffer.WriteRune('\n')
+        if len(results) == 0 {
+            s.ChannelMessageSend(m.ChannelID, "No results found")
+            continue
         }
+
+        fields := []*discordgo.MessageEmbedField{}
+        for i, result := range results {
+            field := &discordgo.MessageEmbedField {
+                Name: fmt.Sprintf("%d: Similarity: %d%%", i+1, result.PercentSimilar),
+                Value: result.URL,
+            }
+            fields = append(fields, field)
+        }
+
         embed := &discordgo.MessageEmbed {
                 Title: "Results",
                 Color: COLOR,
-                Description: buffer.String(),
+                Thumbnail: &discordgo.MessageEmbedThumbnail {
+                    URL: img_url,
+                },
+                Fields: fields,
             }
         s.ChannelMessageSendEmbed(m.ChannelID, embed)
     }

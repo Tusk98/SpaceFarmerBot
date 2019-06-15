@@ -51,7 +51,7 @@ func HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate) error {
         Title: "daily usage",
         Color: COLOR,
         Description: fmt.Sprintf("Usage: daily [OPTIONS]\n%s", DESCRIPTION),
-        Fields: []*discordgo.MessageEmbedField{
+        Fields: []*discordgo.MessageEmbedField {
             { Name: "all", Value: "fetches all the latest images from supported platforms" },
             { Name: "danbooru", Value: "fetches the latest image from danbooru" },
             { Name: "gelbooru", Value: "fetches latest image on gelbooru" },
