@@ -92,8 +92,7 @@ func (self *Event) ToDiscordEmbedWithID(id int) *discordgo.MessageEmbed {
         i := 1
         for _, user := range self.Going {
             going.WriteString(strconv.Itoa(i))
-            going.WriteRune('.')
-            going.WriteRune(' ')
+            going.WriteString(". ")
             going.WriteString(user.Mention())
             going.WriteRune('\n')
             i++
@@ -118,10 +117,12 @@ type EventList struct {
 	mux sync.Mutex
 }
 
-func (self *EventList) AddEvent(event *Event) {
+func (self *EventList) AddEvent(event *Event) int {
     self.mux.Lock()
     self.List = append(self.List, event)
+    index := len(self.List) - 1
     self.mux.Unlock()
+    return index
 }
 
 func (self *EventList) RemoveEvent(index int) (*Event, error) {
@@ -150,16 +151,22 @@ func (self *EventList) AddUserToEvent(index int, user *discordgo.User) (*Event, 
     self.mux.Lock()
     if index < len(self.List) {
         event = self.List[index]
-        err = nil
-        if _, ok := event.Going[user.ID]; !ok {
+        if _, exists := event.Going[user.ID]; exists {
             event.Going[user.ID] = user
+            err = nil
         } else {
-            err = &EventError { reason: "You are already going to this event" }
+            event = nil
+            err = &EventError {
+                reason: "You are already going to this event",
+            }
         }
     } else {
         event = nil
-        err = &EventError { reason: fmt.Sprintf("Event with ID: %d does not exist", index) }
+        err = &EventError {
+                reason: fmt.Sprintf("Event with ID: %d does not exist", index),
+            }
     }
+
     self.mux.Unlock()
 
     return event, err
@@ -171,16 +178,21 @@ func (self *EventList) RemoveUserFromEvent(index int, userID string) (*Event, er
 
     self.mux.Lock()
     if index < len(self.List) {
-        event := self.List[index]
-        err = nil
-        if _, ok := event.Going[userID]; ok {
+        event = self.List[index]
+        if _, exists := event.Going[userID]; exists {
             delete(event.Going, userID)
+            err = nil
         } else {
-            err = &EventError { reason: "You are already not going to this event" }
+            event = nil
+            err = &EventError {
+                reason: "You were not on the list of people going",
+            }
         }
     } else {
         event = nil
-        err = &EventError { reason: "Event does not exist" }
+        err = &EventError {
+                reason: fmt.Sprintf("Event with ID: %d does not exist", index),
+            }
     }
     self.mux.Unlock()
 

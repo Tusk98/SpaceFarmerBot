@@ -33,30 +33,24 @@ func HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate) error {
 }
 
 func getSliceInd(args string) int {
+    delims := [...]rune{ '`', ' ', '\t', '\n' }
+
     slice_at := -1
-    slice_ind := strings.IndexRune(args, '`')
-    if slice_at == -1 {
-        slice_at = slice_ind
-    }
-    slice_ind = strings.IndexRune(args, ' ')
-    if slice_at == -1 {
-        slice_at = slice_ind
-    }
-    if slice_ind != -1 && slice_at > slice_ind {
-        slice_at = slice_ind
-    }
-    slice_ind = strings.IndexRune(args, '\n')
-    if slice_at == -1 {
-        slice_at = slice_ind
-    }
-    if slice_ind != -1 && slice_at > slice_ind {
-        slice_at = slice_ind
+    for _, delim := range delims {
+        slice_ind := strings.IndexRune(args, delim)
+        if slice_ind != -1 {
+            if slice_at == -1 {
+                slice_at = slice_ind
+            } else if slice_at > slice_ind {
+                slice_at = slice_ind
+            }
+        }
     }
     return slice_at
 }
 
 func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
-    s.ChannelMessageSend(m.ChannelID, "***Warning: you are currently using an experimental feature***")
+    s.ChannelMessageSend(m.ChannelID, "***Warning: feature is currently experimental***")
 
     slice_at := getSliceInd(args)
     var cmd, xs string
@@ -109,8 +103,9 @@ func newEvent(s *discordgo.Session, m *discordgo.MessageCreate, args string) err
         return err
     }
     event := eventToml.toEvent()
+    id := eventList.AddEvent(event)
 
-    embed := event.ToDiscordEmbed()
+    embed := event.ToDiscordEmbedWithID(id)
 
     s.ChannelMessageSend(m.ChannelID, "New event has been added")
     s.ChannelMessageSendEmbed(m.ChannelID, embed)
@@ -118,9 +113,6 @@ func newEvent(s *discordgo.Session, m *discordgo.MessageCreate, args string) err
     s.MessageReactionAdd(msg.ChannelID, msg.ID, "\u2705")
     s.MessageReactionAdd(msg.ChannelID, msg.ID, "\u274E")
 */
-
-    eventList.AddEvent(event)
-
     return nil
 }
 
