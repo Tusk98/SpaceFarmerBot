@@ -38,5 +38,36 @@ If you've already installed it and `$GOPATH/bin` is in your `$PATH`
 ```
 ## Features
  - 8ball: ask a question and it will be answered with a yes or no
+```
+# example usage
++8ball is it going to rain today?
++8ball are the raptors going to win?
+```
  - daily: fetches latest image from supported websites
+```
+# example usage
++daily
++daily danbooru
++daily yandere
++daily all
+```
+ - event: manage upcoming events
+```
+# example usage
++event new ` ` ` <-- note these should not contain spaces in between
+name = "New Event"
+description = "This is a new event"
+date = "This is a string that represents a date"
+location = "This is where the event will take place"
+` ` `
++event remove 0
++event join 0
++event leave 0
++event list
+```
  - sauce: provide some images and sources for them will be found
+```
+# example usage
++sauce         # has an image attached
++sauce https://github.com/Tusk98/SpaceFarmerBot/raw/master/spacefarmer.jpg
+```
