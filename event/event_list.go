@@ -77,8 +77,8 @@ func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args strin
 func listEvents(s *discordgo.Session, m *discordgo.MessageCreate) error {
     if len(eventList.List) == 0 {
         embed := &discordgo.MessageEmbed {
+            Title: "No events planned",
             Color: COLOR,
-            Description: "No events planned",
         }
         s.ChannelMessageSendEmbed(m.ChannelID, embed)
         return nil
