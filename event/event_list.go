@@ -32,7 +32,7 @@ func HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate) error {
     return nil
 }
 
-func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
+func getSliceInd(args string) int {
     slice_at := -1
     slice_ind := strings.IndexRune(args, '`')
     if slice_at == -1 {
@@ -52,7 +52,13 @@ func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args strin
     if slice_ind != -1 && slice_at > slice_ind {
         slice_at = slice_ind
     }
+    return slice_at
+}
 
+func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
+    s.ChannelMessageSend(m.ChannelID, "***Warning: you are currently using an experimental feature***")
+
+    slice_at := getSliceInd(args)
     var cmd, xs string
     if slice_at == -1 {
         cmd = args
