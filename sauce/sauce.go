@@ -54,6 +54,10 @@ func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args strin
 
     for _, attachment := range m.Attachments {
         img_url := attachment.URL
+        if len(img_url) <= 6 || !strings.HasPrefix(img_url, "http") {
+            continue
+        }
+
         results, err := getSimilarResults(img_url)
         if err != nil {
             return err

@@ -76,19 +76,6 @@ func onReady(discord *discordgo.Session, ready *discordgo.Ready) {
     }
 }
 
-func reactHandler(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
-    origMessage, err := s.ChannelMessage(m.MessageReaction.ChannelID, m.MessageReaction.MessageID)
-    if err != nil {
-        return
-    }
-
-    if origMessage.Author.ID != s.State.User.ID {
-        return
-    }
-
-    s.ChannelMessageSend(m.ChannelID, origMessage.Content)
-}
-
 // This function will be called (due to AddHandler above) every time a new
 // message is created on any channel that the autenticated bot has access to.
 func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -142,6 +129,8 @@ func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
     }
 }
 
+func reactHandler(s *discordgo.Session, m *discordgo.MessageReactionAdd) {}
+
 func main() {
     /* get config path */
     config_path, err := xdg.SearchConfigFile(CONFIG_PATH)
@@ -177,7 +166,7 @@ func main() {
     /* Register functions as a callback for MessageCreate events */
     dg.AddHandler(onReady)
     dg.AddHandler(commandHandler)
-    dg.AddHandler(reactHandler)
+//    dg.AddHandler(reactHandler)
 
     // Open a websocket connection to Discord and begin listening.
     err = dg.Open()

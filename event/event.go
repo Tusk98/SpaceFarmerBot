@@ -1,106 +1,188 @@
 package event
 
 import (
+    "bytes"
     "fmt"
+    "strconv"
     "strings"
-    "github.com/pelletier/go-toml"
+    "sync"
     "github.com/bwmarrin/discordgo"
 )
 
-const COMMAND string = "event"
-const DESCRIPTION string = "creates and tracks events"
+type EventError struct {
+    reason string
+}
+func (self *EventError) Error() string {
+    return self.reason
+}
 
-const COLOR int = 0xff93ac
+type EventToml struct {
+    Name string
+    Date string
+    Location string
+    Description string
+}
+
+func (self *EventToml) toEvent() *Event {
+    name := strings.TrimSpace(self.Name)
+    if len(name) == 0 {
+        name = "No event name specified"
+    }
+    date := strings.TrimSpace(self.Date)
+    if len(date) == 0 {
+        date = "No date specified"
+    }
+    location := strings.TrimSpace(self.Location)
+    if len(location) == 0 {
+        location = "No location specified"
+    }
+    description := strings.TrimSpace(self.Description)
+    if len(description) == 0 {
+        location = "No description available"
+    }
+    return &Event {
+        Name: name,
+        Date: date,
+        Location: location,
+        Description: description,
+        Going: make(map[string]*discordgo.User),
+    }
+}
 
 type Event struct {
     Name string
     Date string
+    Location string
     Description string
+    Going map[string]*discordgo.User
 }
 
-type EventInfoNotFoundError struct {
-    reason string
-}
-func (self *EventInfoNotFoundError) Error() string {
-    return self.reason
-}
-
-func HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate) error {
-    embed := &discordgo.MessageEmbed {
-        Title: "event usage",
-        Color: COLOR,
-        Description: fmt.Sprintf("Usage: event [OPTIONS]\n%s", DESCRIPTION),
-        Fields: []*discordgo.MessageEmbedField{
-            { Name: "new\n```name = \"...\"\ndate = \"...\"\ndescription = \"...\"```",
-                    Value: "creates a new event with the specified information" },
-            { Name: "remove name", Value: "removes the given event" },
-        },
-    }
-    s.ChannelMessageSendEmbed(m.ChannelID, embed)
-    return nil
-}
-
-func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
-    slice_ind := strings.IndexRune(args, '`')
-    cmd := args
-    xs := ""
-    if slice_ind != -1 {
-        cmd = strings.TrimSpace(args[:slice_ind])
-        xs = args[slice_ind:]
-    }
-    fmt.Printf("cmd: \"%s\"\nxs: \"%s\"\n", cmd, xs)
-
-    switch cmd {
-        case "": {
-            s.ChannelMessageSend(m.ChannelID, "TODO")
+func (self *Event) ToDiscordEmbed() *discordgo.MessageEmbed {
+    going := bytes.Buffer {}
+    if len(self.Going) == 0 {
+        going.WriteRune('-')
+    } else {
+        i := 1
+        for _, user := range self.Going {
+            going.WriteString(strconv.Itoa(i))
+            going.WriteString(user.Mention())
+            going.WriteRune('\n')
+            i++
         }
-        case "help": return HelpMessage(s, m)
-        case "new": return newEvent(s, m, xs)
-        case "remove": return removeEvent(s, m, xs)
-        default: return HelpMessage(s, m)
     }
-    return nil
-}
-
-func newEvent(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
-    const DISCORD_CODE_ENCLOSURE string = "```"
-
-    event_info := args
-    event_str_start := strings.Index(event_info, DISCORD_CODE_ENCLOSURE)
-    if event_str_start == -1 {
-        return &EventInfoNotFoundError { "Could not find ```" }
-    }
-    event_info = event_info[event_str_start + len(DISCORD_CODE_ENCLOSURE):]
-
-    event_str_end := strings.Index(event_info, DISCORD_CODE_ENCLOSURE)
-    if event_str_end == -1 {
-        return &EventInfoNotFoundError { "Could not find matching pair of ```" }
-    }
-    event_info = event_info[:event_str_end]
-
-    var event Event
-    if err := toml.Unmarshal([]byte(event_info), &event); err != nil {
-        return err
-    }
-
     embed := &discordgo.MessageEmbed {
-        Title: event.Name,
+        Title: self.Name,
         Color: COLOR,
-        Description: event.Description,
-        Fields: []*discordgo.MessageEmbedField{
-            { Name: "Date", Value: event.Date },
-            { Name: "Going", Value: "-" },
+        Description: self.Description,
+        Fields: []*discordgo.MessageEmbedField {
+            { Name: "Date", Value: self.Date },
+            { Name: "Location", Value: self.Location },
+            { Name: "Description", Value: self.Description },
+            { Name: "Going", Value: going.String() },
         },
     }
-    msg, err := s.ChannelMessageSendEmbed(m.ChannelID, embed)
-    if err != nil {
-        return err
-    }
-    s.MessageReactionAdd(msg.ChannelID, msg.ID, "\u2705")
-    s.MessageReactionAdd(msg.ChannelID, msg.ID, "\u274E")
-    return nil
+    return embed
 }
 
-func removeEvent(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
-    return nil
+func (self *Event) ToDiscordEmbedWithID(id int) *discordgo.MessageEmbed {
+    going := bytes.Buffer {}
+    if len(self.Going) == 0 {
+        going.WriteRune('-')
+    } else {
+        i := 1
+        for _, user := range self.Going {
+            going.WriteString(strconv.Itoa(i))
+            going.WriteRune('.')
+            going.WriteRune(' ')
+            going.WriteString(user.Mention())
+            going.WriteRune('\n')
+            i++
+        }
+    }
+    embed := &discordgo.MessageEmbed {
+        Title: fmt.Sprintf("#%d %s", id, self.Name),
+        Color: COLOR,
+        Description: self.Description,
+        Fields: []*discordgo.MessageEmbedField {
+            { Name: "Date", Value: self.Date },
+            { Name: "Location", Value: self.Location },
+            { Name: "Description", Value: self.Description },
+            { Name: "Going", Value: going.String() },
+        },
+    }
+    return embed
+}
+
+type EventList struct {
+    List []*Event
+	mux sync.Mutex
+}
+
+func (self *EventList) AddEvent(event *Event) {
+    self.mux.Lock()
+    self.List = append(self.List, event)
+    self.mux.Unlock()
+}
+
+func (self *EventList) RemoveEvent(index int) (*Event, error) {
+    var event *Event
+    var err error
+
+    self.mux.Lock()
+    if index < len(self.List) {
+        event = self.List[index]
+        err = nil
+        self.List[index] = self.List[len(self.List) - 1]
+        self.List = self.List[:len(self.List) - 1]
+    } else {
+        event = nil
+        err = &EventError { reason: fmt.Sprintf("Event with ID: %d does not exist", index) }
+    }
+    self.mux.Unlock()
+
+    return event, err
+}
+
+func (self *EventList) AddUserToEvent(index int, user *discordgo.User) (*Event, error) {
+    var event *Event
+    var err error
+
+    self.mux.Lock()
+    if index < len(self.List) {
+        event = self.List[index]
+        err = nil
+        if _, ok := event.Going[user.ID]; !ok {
+            event.Going[user.ID] = user
+        } else {
+            err = &EventError { reason: "You are already going to this event" }
+        }
+    } else {
+        event = nil
+        err = &EventError { reason: fmt.Sprintf("Event with ID: %d does not exist", index) }
+    }
+    self.mux.Unlock()
+
+    return event, err
+}
+
+func (self *EventList) RemoveUserFromEvent(index int, userID string) (*Event, error) {
+    var event *Event
+    var err error
+
+    self.mux.Lock()
+    if index < len(self.List) {
+        event := self.List[index]
+        err = nil
+        if _, ok := event.Going[userID]; ok {
+            delete(event.Going, userID)
+        } else {
+            err = &EventError { reason: "You are already not going to this event" }
+        }
+    } else {
+        event = nil
+        err = &EventError { reason: "Event does not exist" }
+    }
+    self.mux.Unlock()
+
+    return event, err
 }
