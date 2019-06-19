@@ -57,7 +57,7 @@ func (self *TldrCommand) ProcessCommand(s *discordgo.Session, m *discordgo.Messa
     var title string
     var description bytes.Buffer
     var fields []*discordgo.MessageEmbedField
-    var curr_field discordgo.MessageEmbedField
+    var curr_field *discordgo.MessageEmbedField
     for scanner.Scan() {
         line := scanner.Text()
         if strings.HasPrefix(line, "#") {
@@ -66,10 +66,10 @@ func (self *TldrCommand) ProcessCommand(s *discordgo.Session, m *discordgo.Messa
             description.WriteString(line[2:])
             description.WriteRune('\n')
         } else if strings.HasPrefix(line, "-") {
-            curr_field = discordgo.MessageEmbedField { Name: line[2:] }
+            curr_field = &discordgo.MessageEmbedField { Name: line[2:] }
         } else if strings.HasPrefix(line, "`") {
             curr_field.Value = fmt.Sprintf("``%s``", line)
-            fields = append(fields, &curr_field)
+            fields = append(fields, curr_field)
         }
     }
     embed := &discordgo.MessageEmbed {
