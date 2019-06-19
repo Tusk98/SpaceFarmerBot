@@ -1,9 +1,11 @@
 package tldr
 
 import (
+    "bytes"
+    "bufio"
     "fmt"
     "net/http"
-    "io/ioutil"
+    "strings"
     "github.com/bwmarrin/discordgo"
 )
 
@@ -50,8 +52,33 @@ func (self *TldrCommand) ProcessCommand(s *discordgo.Session, m *discordgo.Messa
     }
 
     defer resp.Body.Close()
-    body, err := ioutil.ReadAll(resp.Body)
-    s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("```md\n%s```", body))
+
+	scanner := bufio.NewScanner(resp.Body)
+    var title string
+    var description bytes.Buffer
+    var fields []*discordgo.MessageEmbedField
+    var curr_field discordgo.MessageEmbedField
+    for scanner.Scan() {
+        line := scanner.Text()
+        if strings.HasPrefix(line, "#") {
+            title = line[2:]
+        } else if strings.HasPrefix(line, ">") {
+            description.WriteString(line[2:])
+            description.WriteRune('\n')
+        } else if strings.HasPrefix(line, "-") {
+            curr_field = discordgo.MessageEmbedField { Name: line[2:] }
+        } else if strings.HasPrefix(line, "`") {
+            curr_field.Value = fmt.Sprintf("``%s``", line)
+            fields = append(fields, &curr_field)
+        }
+    }
+    embed := &discordgo.MessageEmbed {
+        Title: title,
+        Color: COLOR,
+        Description: description.String(),
+        Fields: fields,
+    }
+    s.ChannelMessageSendEmbed(m.ChannelID, embed)
     return nil
 }
 
