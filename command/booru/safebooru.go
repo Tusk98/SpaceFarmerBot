@@ -19,7 +19,7 @@ type safebooruPost struct {
     Sample bool `json:"sample"`
 }
 
-func (self *safebooruPost) toBooruPost() BooruPost {
+func (self *safebooruPost) toBooruPost() *BooruPost {
     FileUrl := fmt.Sprintf("https://safebooru.org/images/%s/%s", self.Directory, self.Image)
     var PreviewFileUrl string
     if self.Sample {
@@ -39,28 +39,28 @@ func (self *safebooruPost) toBooruPost() BooruPost {
         ImageWidth: self.ImageWidth,
         ImageHeight: self.ImageHeight,
     }
-    return booru_post
+    return &booru_post
 }
 
-func SafebooruLatestPost() (BooruPost, error) {
+func SafebooruLatestPost() (*BooruPost, error) {
     const api_url = "https://safebooru.org/index.php?page=dapi&s=post&q=index&json=1&limit=1"
 
     spaceClient := http.Client{Timeout: time.Second * 10}
     resp, err := spaceClient.Get(api_url)
 
     if err != nil {
-        return BooruPost{}, err
+        return nil, err
     }
 
     json_content, readErr := ioutil.ReadAll(resp.Body)
     if readErr != nil {
-        return BooruPost{}, readErr
+        return nil, readErr
     }
 
     var posts [1]safebooruPost
     jsonErr := json.Unmarshal(json_content, &posts)
     if jsonErr != nil {
-        return BooruPost{}, jsonErr
+        return nil, jsonErr
     }
 
     return posts[0].toBooruPost(), nil

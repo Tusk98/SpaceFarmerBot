@@ -4,6 +4,7 @@ import (
     "fmt"
     "math/rand"
     "github.com/bwmarrin/discordgo"
+    "github.com/Tusk98/SpaceFarmerBot/command"
 )
 
 const COMMAND string = "daily"
@@ -39,14 +40,18 @@ func (self *BooruPost) ToDiscordEmbed() *discordgo.MessageEmbed {
     }
 }
 
-type UnknownBooruError struct {
-    arg string
-}
-func (self *UnknownBooruError) Error() string {
-    return self.arg
-}
+type BooruCommand struct {}
 
-func HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate) error {
+/* for BotCommand interface */
+func (self *BooruCommand) Prefix() string {
+    return COMMAND
+}
+/* for BotCommand interface */
+func (self *BooruCommand) Description() string {
+    return DESCRIPTION
+}
+/* for BotCommand interface */
+func (self *BooruCommand) HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate) error {
     embed := &discordgo.MessageEmbed {
         Title: "daily usage",
         Color: COLOR,
@@ -63,10 +68,10 @@ func HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate) error {
     s.ChannelMessageSendEmbed(m.ChannelID, embed)
     return nil
 }
-
-func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
+/* for BotCommand interface */
+func (self *BooruCommand) ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
     switch args {
-        case "help": return HelpMessage(s, m)
+        case "help": return self.HelpMessage(s, m)
         case "": {
             booru := uint(rand.Int()) % BOORUS_SUPPORTED
             post, err := BooruGetLatest(booru)
@@ -109,17 +114,17 @@ func parseBooruType(arg string) (uint, error) {
     case "konachan": return Konachan, nil
     case "safebooru": return Safebooru, nil
     case "gelbooru": return Gelbooru, nil
-    default: return 100, &UnknownBooruError { arg: fmt.Sprintf("Unknown argument: %s", arg) }
+    default: return 0, &command.CommandError { Reason: fmt.Sprintf("Unknown argument: %s", arg) }
     }
 }
 
-func BooruGetLatest(booru uint) (BooruPost, error) {
+func BooruGetLatest(booru uint) (*BooruPost, error) {
     switch booru {
     case Danbooru: return DanbooruLatestPost()
     case Yandere: return YandereLatestPost()
     case Konachan: return KonachanLatestPost()
     case Safebooru: return SafebooruLatestPost()
     case Gelbooru: return GelbooruLatestPost()
-    default: return BooruPost{}, &UnknownBooruError {}
+    default: return nil, &command.CommandError {}
     }
 }

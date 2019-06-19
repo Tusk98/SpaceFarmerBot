@@ -16,7 +16,7 @@ type konachanPost struct {
     FileUrl string `json:"file_url"`
 }
 
-func (self *konachanPost) toBooruPost() BooruPost {
+func (self *konachanPost) toBooruPost() *BooruPost {
     booru_post := BooruPost {
         Source: "Konachan",
         ID: self.ID,
@@ -26,28 +26,28 @@ func (self *konachanPost) toBooruPost() BooruPost {
         ImageWidth: self.ImageWidth,
         ImageHeight: self.ImageHeight,
     }
-    return booru_post
+    return &booru_post
 }
 
-func KonachanLatestPost() (BooruPost, error) {
+func KonachanLatestPost() (*BooruPost, error) {
     const api_url = "https://konachan.com/post.json?limit=1"
 
     spaceClient := http.Client{Timeout: time.Second * 10}
     resp, err := spaceClient.Get(api_url)
 
     if err != nil {
-        return BooruPost{}, err
+        return nil, err
     }
 
     json_content, readErr := ioutil.ReadAll(resp.Body)
     if readErr != nil {
-        return BooruPost{}, readErr
+        return nil, readErr
     }
 
     var posts [1]konachanPost
     jsonErr := json.Unmarshal(json_content, &posts)
     if jsonErr != nil {
-        return BooruPost{}, jsonErr
+        return nil, jsonErr
     }
 
     return posts[0].toBooruPost(), nil

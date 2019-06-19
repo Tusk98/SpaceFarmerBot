@@ -34,8 +34,23 @@ var _ANSWERS = [...]string{
 	"Very doubtful",
 }
 
-func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
-    if args == "" {
+type EightBall struct {}
+
+/* for BotCommand interface */
+func (self *EightBall) Prefix() string {
+    return COMMAND
+}
+/* for BotCommand interface */
+func (self *EightBall) Description() string {
+    return DESCRIPTION
+}
+/* for BotCommand interface */
+func (self *EightBall) HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate) error {
+    return self.ProcessCommand(s, m, "help")
+}
+/* for BotCommand interface */
+func (self *EightBall) ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
+    if len(args) == 0 {
         s.ChannelMessageSend(m.ChannelID, "No questions? Back to farming...")
     } else {
         msg_index := rand.Int() % len(_ANSWERS)

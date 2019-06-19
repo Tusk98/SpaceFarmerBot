@@ -7,6 +7,7 @@ import (
     "io/ioutil"
     "strings"
     "github.com/bwmarrin/discordgo"
+    "github.com/Tusk98/SpaceFarmerBot/command"
 )
 
 const COMMAND string = "sauce"
@@ -14,25 +15,21 @@ const DESCRIPTION string = "provide some images and sources for them will be fou
 
 const COLOR int = 0xff93ac
 
-type GenericBotError struct {
-    reason string
-}
-func (self *GenericBotError) Error() string {
-    return self.reason
-}
-
-type SimilarityResult struct {
-    URL string
-    PercentSimilar uint8
-    Height uint
-    Width uint
-}
-
-
 const IQDB_PATTERN string = "match</th></tr><tr><td class='image'><a href=\""
 const IQDB_DIMENSION_PATTERN string = "class=\"service-icon\">"
 
-func HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate) error {
+
+type SauceCommand struct {}
+/* for BotCommand interface */
+func (self *SauceCommand) Prefix() string {
+    return COMMAND
+}
+/* for BotCommand interface */
+func (self *SauceCommand) Description() string {
+    return DESCRIPTION
+}
+/* for BotCommand interface */
+func (self *SauceCommand) HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate) error {
     embed := &discordgo.MessageEmbed {
         Title: "sauce usage",
         Color: COLOR,
@@ -41,15 +38,16 @@ func HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate) error {
     s.ChannelMessageSendEmbed(m.ChannelID, embed)
     return nil
 }
-
-func ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
+/* for BotCommand interface */
+func (self *SauceCommand) ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
+    /* no attachments or links from user */
     if len(m.Attachments) == 0 && len(args) == 0 {
         s.ChannelMessageSend(m.ChannelID, "No images/links to work off of? Back to farming...")
         return nil
     }
     arg_lst := strings.Split(args, " ")
     if arg_lst[0] == "help" {
-        return HelpMessage(s, m)
+        return self.HelpMessage(s, m)
     }
 
     for _, attachment := range m.Attachments {
@@ -130,8 +128,8 @@ func getSimilarResults(img_url string) ([]SimilarityResult, error) {
         return nil, err
     }
     if resp.StatusCode != 200 {
-        return nil, &GenericBotError{
-            reason: fmt.Sprintf("Request failed with error code: %d", resp.StatusCode),
+        return nil, &command.CommandError{
+            Reason: fmt.Sprintf("Request failed with error code: %d", resp.StatusCode),
         }
     }
     defer resp.Body.Close()

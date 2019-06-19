@@ -8,6 +8,7 @@ import (
     "strings"
     "syscall"
     "github.com/bwmarrin/discordgo"
+    "github.com/Tusk98/SpaceFarmerBot/command"
     "github.com/Tusk98/SpaceFarmerBot/command/ball"
     "github.com/Tusk98/SpaceFarmerBot/command/booru"
     "github.com/Tusk98/SpaceFarmerBot/command/event"
@@ -33,6 +34,7 @@ var _STATUS_VALUES []string = []string {
     "Unveiling rivens",
 }
 
+var cmdDict map[string]command.BotCommand = initCmdDict()
 
 type UnknownCommandError struct {
     arg string
@@ -41,17 +43,40 @@ func (self *UnknownCommandError) Error() string {
     return self.arg
 }
 
+func initCmdDict() map[string]command.BotCommand {
+    dict := make(map[string]command.BotCommand)
+
+    // 8ball command
+    eight_ball := ball.EightBall {}
+    dict[eight_ball.Prefix()] = &eight_ball
+
+    // daily command
+    booru := booru.BooruCommand {}
+    dict[booru.Prefix()] = &booru
+
+    // event command
+    event_list := event.EventList {}
+    dict[event_list.Prefix()] = &event_list
+
+    // sauce command
+    sauce := sauce.SauceCommand {}
+    dict[sauce.Prefix()] = &sauce
+
+    return dict
+}
+
 func HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
+    fields := []*discordgo.MessageEmbedField {}
+    for key, cmd := range cmdDict {
+        field := discordgo.MessageEmbedField { Name: key, Value: cmd.Description() }
+        fields = append(fields, &field)
+    }
+
     embed := &discordgo.MessageEmbed {
         Title: "SpaceFarmerBot Usage",
         Color: COLOR,
         Description: fmt.Sprintf("%scommand arguments", COMMAND_PREFIX),
-        Fields: []*discordgo.MessageEmbedField{
-            // please keep in alphanumeric order
-            { Name: ball.COMMAND, Value: ball.DESCRIPTION },
-            { Name: booru.COMMAND, Value: booru.DESCRIPTION },
-            { Name: sauce.COMMAND, Value: sauce.DESCRIPTION },
-        },
+        Fields: fields,
     }
     s.ChannelMessageSendEmbed(m.ChannelID, embed)
     return nil
@@ -96,27 +121,13 @@ func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
     }
     fmt.Printf("cmd: \"%s\"\nargs: \"%s\"\n", command, args)
 
-    var err error = nil
-
-    // check for valid commands
-    switch command {
-    case "help": err = HelpMessage(s, m, args)
-    case booru.COMMAND: err = booru.ProcessCommand(s, m, args)
-    case ball.COMMAND: err = ball.ProcessCommand(s, m, args)
-    case event.COMMAND: err = event.ProcessCommand(s, m, args)
-    case sauce.COMMAND: err = sauce.ProcessCommand(s, m, args)
-    // unknown command
-    default: err = nil
-/*
-    default: err = &UnknownCommandError {
-            arg: fmt.Sprintf("Unknown Command: %s", command),
+    if val, ok := cmdDict[command]; ok {
+        err := val.ProcessCommand(s, m, args)
+        if err != nil {
+            s.ChannelMessageSend(m.ChannelID, err.Error())
         }
-*/
     }
 
-    if err != nil {
-        s.ChannelMessageSend(m.ChannelID, err.Error())
-    }
 }
 
 func reactHandler(s *discordgo.Session, m *discordgo.MessageReactionAdd) {}

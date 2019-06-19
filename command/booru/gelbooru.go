@@ -18,7 +18,7 @@ type gelbooruPost struct {
     Sample bool `json:"sample"`
 }
 
-func (self *gelbooruPost) toBooruPost() BooruPost {
+func (self *gelbooruPost) toBooruPost() *BooruPost {
     var PreviewFileUrl string
     if self.Sample {
         PreviewFileUrl = fmt.Sprintf("https://img2.gelbooru.com/samples/%s/sample_%s.jpg", self.Directory, self.Hash)
@@ -34,28 +34,28 @@ func (self *gelbooruPost) toBooruPost() BooruPost {
         ImageWidth: self.ImageWidth,
         ImageHeight: self.ImageHeight,
     }
-    return booru_post
+    return &booru_post
 }
 
-func GelbooruLatestPost() (BooruPost, error) {
+func GelbooruLatestPost() (*BooruPost, error) {
     const api_url = "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&limit=1"
 
     spaceClient := http.Client{Timeout: time.Second * 10}
     resp, err := spaceClient.Get(api_url)
 
     if err != nil {
-        return BooruPost{}, err
+        return nil, err
     }
 
     json_content, readErr := ioutil.ReadAll(resp.Body)
     if readErr != nil {
-        return BooruPost{}, readErr
+        return nil, readErr
     }
 
     var posts [1]gelbooruPost
     jsonErr := json.Unmarshal(json_content, &posts)
     if jsonErr != nil {
-        return BooruPost{}, jsonErr
+        return nil, jsonErr
     }
 
     return posts[0].toBooruPost(), nil
