@@ -34,8 +34,6 @@ var _STATUS_VALUES []string = []string {
     "Unveiling rivens",
 }
 
-var cmdDict map[string]command.BotCommand = initCmdDict()
-
 type UnknownCommandError struct {
     arg string
 }
@@ -43,8 +41,14 @@ func (self *UnknownCommandError) Error() string {
     return self.arg
 }
 
+var cmdDict map[string]command.BotCommand = initCmdDict()
+
 func initCmdDict() map[string]command.BotCommand {
     dict := make(map[string]command.BotCommand)
+
+    // help command
+    help := HelpCommand {}
+    dict[help.Prefix()] = &help
 
     // 8ball command
     eight_ball := ball.EightBall {}
@@ -65,7 +69,18 @@ func initCmdDict() map[string]command.BotCommand {
     return dict
 }
 
-func HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
+type HelpCommand struct {}
+
+/* for BotCommand interface */
+func (self *HelpCommand) Prefix() string {
+    return "help"
+}
+/* for BotCommand interface */
+func (self *HelpCommand) Description() string {
+    return "provides help for all commands"
+}
+/* for BotCommand interface */
+func (self *HelpCommand) HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate) error {
     fields := []*discordgo.MessageEmbedField {}
     for key, cmd := range cmdDict {
         field := discordgo.MessageEmbedField { Name: key, Value: cmd.Description() }
@@ -80,6 +95,14 @@ func HelpMessage(s *discordgo.Session, m *discordgo.MessageCreate, args string) 
     }
     s.ChannelMessageSendEmbed(m.ChannelID, embed)
     return nil
+}
+/* for BotCommand interface */
+func (self *HelpCommand) ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
+    if val, ok := cmdDict[args]; ok {
+        return val.HelpMessage(s, m)
+    } else {
+        return self.HelpMessage(s, m)
+    }
 }
 
 func onReady(discord *discordgo.Session, ready *discordgo.Ready) {
@@ -127,7 +150,6 @@ func commandHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
             s.ChannelMessageSend(m.ChannelID, err.Error())
         }
     }
-
 }
 
 func reactHandler(s *discordgo.Session, m *discordgo.MessageReactionAdd) {}
