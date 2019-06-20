@@ -37,6 +37,10 @@ func (self *TldrCommand) HelpMessage(s *discordgo.Session, m *discordgo.MessageC
 }
 /* for BotCommand interface */
 func (self *TldrCommand) ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate, args string) error {
+    if len(args) == 0 {
+        self.HelpMessage(s, m)
+        return nil
+    }
     /* first check if its a linux specific command */
     url := fmt.Sprintf("%s/linux/%s.md", TLDR_INDEX, args)
     resp, err := http.Get(url)
