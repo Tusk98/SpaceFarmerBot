@@ -12,6 +12,7 @@ import (
 	"github.com/Tusk98/SpaceFarmerBot/command/ball"
 	"github.com/Tusk98/SpaceFarmerBot/command/booru"
 	"github.com/Tusk98/SpaceFarmerBot/command/event"
+	"github.com/Tusk98/SpaceFarmerBot/command/foundation"
 	"github.com/Tusk98/SpaceFarmerBot/command/sauce"
 	"github.com/Tusk98/SpaceFarmerBot/command/tldr"
 	"github.com/Tusk98/SpaceFarmerBot/config"
@@ -69,10 +70,11 @@ func initCmdDict() map[string]command.BotCommand {
 	sauce := sauce.SauceCommand{}
 	dict[sauce.Prefix()] = &sauce
 
-	// sauce command
+	// tldr command
 	tldr := tldr.TldrCommand{}
 	dict[tldr.Prefix()] = &tldr
 
+	// foundation command
 	foundation := foundation.FoundationCommand{}
 	dict[foundation.Prefix()] = &foundation
 
