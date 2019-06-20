@@ -1,9 +1,11 @@
 # SpaceFarmerBot
 
 <p>
-<img src="https://github.com/Tusk98/SpaceFarmerBot/raw/master/spacefarmer.jpg"
+<img src="https://github.com/Tusk98/SpaceFarmerBot/raw/master/SpaceFarmer.jpg"
      width="350">
 </p>
+
+Art by Meribo - https://meribo.tumblr.com/
 
 ## Dependencies
  - golang (preferably 1.12+, older versions require you to manually download dependencies via `go get`)
