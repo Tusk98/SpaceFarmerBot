@@ -40,7 +40,7 @@ func (self *FoundationCommand) ProcessCommand(s *discordgo.Session, m *discordgo
 	if len(args) == 0 {
 		s.ChannelMessageSend(m.ChannelID, "No SCP Requests? Back to farming...")
 		fmt.Println("NOT DAILY")
-	} else {
+	} else if args == "random" {
 		number := randomInt()
 		scp := "SCP-" + strconv.Itoa(number)
 		fullscp := WIKI + strconv.Itoa(number)
@@ -55,6 +55,8 @@ func (self *FoundationCommand) ProcessCommand(s *discordgo.Session, m *discordgo
 		}
 		fmt.Println("ELSE")
 		s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	} else {
+		s.ChannelMessageSend(m.ChannelID, "Command not recognized.")
 	}
 	return nil
 }
