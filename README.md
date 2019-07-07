@@ -73,3 +73,8 @@ location = "This is where the event will take place"
 +sauce         # has an image attached
 +sauce https://github.com/Tusk98/SpaceFarmerBot/raw/master/spacefarmer.jpg
 ```
+
+- foundation: Currently only provides a random SCP from the SCP wikia at http://www.scp-wiki.net/
+```
++foundation random 
+```
